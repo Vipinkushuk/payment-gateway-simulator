@@ -79,4 +79,48 @@ public class GlobalExceptionHandler {
                 "timestamp", LocalDateTime.now().toString()
         ));
     }
+
+    @ExceptionHandler(OrderAlreadyPaidException.class)
+    public ResponseEntity<Map<String, Object>> handleOrderAlreadyPaid(
+            OrderAlreadyPaidException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
+                "status", 409,
+                "error", "Conflict",
+                "message", ex.getMessage(),
+                "timestamp", LocalDateTime.now().toString()
+        ));
+    }
+
+    @ExceptionHandler(OrderExpiredException.class)
+    public ResponseEntity<Map<String, Object>> handleOrderExpired(
+            OrderExpiredException ex) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(Map.of(
+                "status", 422,
+                "error", "Unprocessable Entity",
+                "message", ex.getMessage(),
+                "timestamp", LocalDateTime.now().toString()
+        ));
+    }
+
+    @ExceptionHandler(FraudDetectedException.class)
+    public ResponseEntity<Map<String, Object>> handleFraud(
+            FraudDetectedException ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of(
+                "status", 429,
+                "error", "Too Many Requests",
+                "message", ex.getMessage(),
+                "timestamp", LocalDateTime.now().toString()
+        ));
+    }
+
+    @ExceptionHandler(InvalidPaymentStateException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidState(
+            InvalidPaymentStateException ex) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(Map.of(
+                "status", 422,
+                "error", "Invalid State Transition",
+                "message", ex.getMessage(),
+                "timestamp", LocalDateTime.now().toString()
+        ));
+    }
 }
