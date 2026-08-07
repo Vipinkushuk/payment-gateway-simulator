@@ -1,5 +1,8 @@
 package com.paymentgateway.controller;
 
+import com.paymentgateway.repository.WebhookDeliveryRepository;
+import com.paymentgateway.entity.WebhookDelivery;
+
 import com.paymentgateway.dto.request.InitiatePaymentRequest;
 import com.paymentgateway.dto.response.PaymentResponse;
 import com.paymentgateway.entity.Merchant;
@@ -21,6 +24,7 @@ import java.util.UUID;
 @Slf4j
 public class PaymentController {
 
+    private final WebhookDeliveryRepository webhookDeliveryRepository;
     private final PaymentService paymentService;
 
     @PostMapping
@@ -60,5 +64,19 @@ public class PaymentController {
 
         return ResponseEntity.ok(
                 paymentService.getPaymentsForOrder(orderId, merchant));
+    }
+
+    @GetMapping("/{paymentId}/webhooks")
+    public ResponseEntity<List<WebhookDelivery>> getWebhookDeliveries(
+            @PathVariable UUID paymentId,
+            HttpServletRequest httpRequest) {
+
+        Merchant merchant =
+                (Merchant) httpRequest.getAttribute("authenticatedMerchant");
+
+        List<WebhookDelivery> deliveries = webhookDeliveryRepository
+                .findByPaymentIdOrderByCreatedAtAsc(paymentId);
+
+        return ResponseEntity.ok(deliveries);
     }
 }

@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PaymentService {
 
+    private final WebhookService webhookService;
     private final PaymentRepository paymentRepository;
     private final PaymentEventRepository paymentEventRepository;
     private final OrderRepository orderRepository;
@@ -177,6 +178,11 @@ public class PaymentService {
             payment = transitionStatus(payment, PaymentStatus.FAILED,
                     "System error: " + e.getMessage());
         }
+
+        // SEND WEBHOOK — async, doesn't block response
+
+        webhookService.sendWebhook(payment, merchant);
+
 
         // CACHE RESPONSE and return
 
