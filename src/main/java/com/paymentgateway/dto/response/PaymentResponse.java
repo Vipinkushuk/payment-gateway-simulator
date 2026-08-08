@@ -3,6 +3,8 @@ package com.paymentgateway.dto.response;
 import com.paymentgateway.entity.Payment;
 import com.paymentgateway.enums.PaymentMethod;
 import com.paymentgateway.enums.PaymentStatus;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,6 +13,8 @@ import java.util.UUID;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class PaymentResponse {
 
     private UUID paymentId;
