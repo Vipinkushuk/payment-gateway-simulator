@@ -97,3 +97,73 @@ App starts at `http://localhost:8080`
 ## API endpoints
 
 All endpoints except `/register` and `/health` require:
+
+### Authentication
+
+All protected endpoints require:
+
+`X-Api-Key: your_api_key`
+
+Payment endpoints additionally require:
+
+`X-Idempotency-Key: unique-uuid-per-request`
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /api/v1/merchants/register | Register merchant, get API key |
+| GET | /api/v1/health | Health check |
+| POST | /api/v1/orders | Create an order |
+| GET | /api/v1/orders/{id} | Get order by ID |
+| POST | /api/v1/payments | Initiate payment |
+| GET | /api/v1/payments/{id} | Get payment status |
+| GET | /api/v1/payments/{id}/webhooks | Get webhook delivery history |
+
+**[Postman Collection →](https://github.com/Vipinkushuk/payment-gateway-simulator)**
+(I will update this link )
+---
+
+## Key flows to test
+
+**1. Register a merchant**
+```bash
+POST /api/v1/merchants/register
+{
+  "name": "Test Merchant",
+  "email": "test@merchant.com",
+  "webhookUrl": "https://webhook.site/your-id"
+}
+# Save the apiKey from response
+```
+
+**2. Create an order**
+```bash
+POST /api/v1/orders
+Header: X-Api-Key: your_key
+{
+  "amount": 50000,
+  "receipt": "order_001"
+}
+# Save the orderId
+```
+
+**3. Pay the order (idempotency test)**
+```bash
+POST /api/v1/payments
+Header: X-Api-Key: your_key
+Header: X-Idempotency-Key: test-key-001
+{
+  "orderId": "paste_order_id",
+  "method": "UPI",
+  "upiId": "test@paytm"
+}
+# Send same request again with same key → identical response returned
+```
+
+**4. Fraud detection test**
+```bash
+# Send 3 failed payments with same upiId (new order + new key each time)
+# 4th attempt returns 429 Too Many Requests
+```
+
+---
+
