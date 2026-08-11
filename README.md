@@ -65,7 +65,7 @@ requests across multiple threads.
 | Layer | Technology |
 |-------|-----------|
 | Language | Java 17 |
-| Framework | Spring Boot 3.2 |
+| Framework | Spring Boot 4.1.0  |
 | Database | PostgreSQL 15 |
 | Cache / Locks | Redis 7 |
 | ORM | Spring Data JPA + Hibernate |
