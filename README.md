@@ -1,7 +1,99 @@
-Payment Gateway Simulator
+# Payment Gateway Simulator
 
-What problem it solves
-Architecture decisions and why
-How to run locally
-Live demo URL
-API documentation
+A production-inspired payment gateway backend implementing core fintech
+engineering patterns: idempotency, state machine, webhook reliability,
+and fraud detection.
+
+**Live API:** https://payment-gateway-simulator.onrender.com/api/v1/health
+
+---
+
+## Why I built this
+
+Payment systems are the hardest backend engineering problem in fintech.
+Every company in this space — Razorpay, Juspay, PhonePe — solves the
+same core challenges: how do you prevent double charges? How do you
+guarantee a merchant gets notified even if their server is down?
+How do you detect fraud without blocking legitimate users?
+
+This project implements those exact solutions from scratch.
+
+---
+
+## Architecture decisions and why
+
+**Amounts stored in paise, not rupees**  
+All amounts are integers (paise). ₹500 = 50000. Floating point math
+is unreliable for money — 0.1 + 0.2 = 0.30000000000000004 in Java.
+Integer arithmetic is always exact. This is the industry standard —
+Razorpay, Stripe, and PayPal all use minor currency units.
+
+**Two-layer idempotency**  
+Idempotency is implemented at two layers: Redis (fast path, O(1) lookup)
+and a database unique constraint on idempotency_key (safe fallback if
+Redis is unavailable). If a merchant's server crashes after sending a
+payment request and they retry, they get back the identical response
+without creating a duplicate charge. Same pattern used by Razorpay.
+
+**Append-only payment events table**  
+Every state transition is recorded in payment_events — never updated,
+only inserted. This creates an immutable audit trail (RBI mandates this
+for payment companies). If something goes wrong, you can reconstruct
+exactly what happened and when.
+
+**Payment state machine with validated transitions**  
+PaymentStatus enum contains canTransitionTo() logic. A SUCCESS payment
+cannot be moved to FAILED. A CREATED payment cannot jump to SUCCESS.
+Invalid transitions throw exceptions. This prevents data corruption
+from bugs or race conditions.
+
+**Async webhook delivery with exponential backoff**  
+Webhooks run in a separate thread (@Async) so the payment API response
+is never blocked by the merchant's server latency. Failed deliveries
+retry at 1 min → 5 min → 30 min → 2 hours. A scheduler runs every
+60 seconds picking up pending retries.
+
+**Redis-based fraud detection**  
+If the same UPI ID fails 3 payments within 60 seconds, it's blocked
+for 15 minutes. Uses Redis atomic INCR with TTL — safe for concurrent
+requests across multiple threads.
+
+---
+
+## Tech stack
+
+| Layer | Technology |
+|-------|-----------|
+| Language | Java 17 |
+| Framework | Spring Boot 3.2 |
+| Database | PostgreSQL 15 |
+| Cache / Locks | Redis 7 |
+| ORM | Spring Data JPA + Hibernate |
+| Auth | API Key (header-based) |
+| Deployment | Docker + Render |
+
+---
+
+## How to run locally
+
+**Prerequisites:** Java 17, Docker Desktop
+
+```bash
+# Clone the repo
+git clone https://github.com/Vipinkushuk/payment-gateway-simulator.git
+cd payment-gateway-simulator
+
+# Start PostgreSQL and Redis
+docker-compose up -d
+
+# Run the app
+./mvnw spring-boot:run
+```
+
+App starts at `http://localhost:8080`
+
+---
+
+## API endpoints
+
+All endpoints except `/register` and `/health` require:
