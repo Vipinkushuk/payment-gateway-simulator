@@ -167,3 +167,20 @@ Header: X-Idempotency-Key: test-key-001
 
 ---
 
+## Database Schema
+
+- `merchants` → API key authentication
+- `orders` → order lifecycle (CREATED → PAID → EXPIRED)
+- `payments` → payment attempts with idempotency key
+- `payment_events` → immutable audit trail of every state change
+- `webhook_deliveries` → delivery attempts with retry tracking
+
+---
+
+## What's different from a real payment gateway
+
+A production gateway connects to NPCI/banks via ISO 8583 messaging,
+requires RBI PA license, PCI-DSS compliance, and HSM for card encryption.
+This project simulates the bank with a mock service (70% success,
+20% fail, 10% timeout) and implements all the surrounding engineering
+patterns identically.
