@@ -118,8 +118,8 @@ Payment endpoints additionally require:
 | GET | /api/v1/payments/{id} | Get payment status |
 | GET | /api/v1/payments/{id}/webhooks | Get webhook delivery history |
 
-**[Postman Collection →](https://github.com/Vipinkushuk/payment-gateway-simulator)**
-(I will update this link )
+**[Postman Collection →](https://paradise-kings-team.postman.co/workspace/chat-app~f586ff85-c332-48ec-a313-12ec5edbd789/collection/41613639-e836fa9e-0208-4c8f-8f77-bd1eb78fa31c?action=share&source=copy-link&creator=41613639)**
+
 ---
 
 ## Key flows to test
