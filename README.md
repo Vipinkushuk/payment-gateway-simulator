@@ -16,6 +16,7 @@ same core challenges: how do you prevent double charges? How do you
 guarantee a merchant gets notified even if their server is down?
 How do you detect fraud without blocking legitimate users?
 
+
 This project implements those exact solutions from scratch.
 
 ---
